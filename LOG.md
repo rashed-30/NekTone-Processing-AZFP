@@ -1,3 +1,4 @@
+-------------
 # AZFP Project Log: NekTone-Processing-AZFP
 
 This log details the setup, configuration, and daily progress for the research project focusing on acoustic zooplankton fish profiler (AZFP) data from the NL region.
@@ -48,3 +49,35 @@ This log details the setup, configuration, and daily progress for the research p
 * **CORE HOMEWORK TASK:** Open the JupyterLab notebook (`01_AZFP_Data_Conversion.ipynb`) and run the Echopype script to load **one** raw `.01A` file and convert it to the analysis-ready NetCDF format (`AZFP_202304_converted.nc`).
 
 ---
+
+## 2025-11 to 2026-03 (Data Processing & Analysis Phase)
+
+### 📊 Acoustic Data Pipeline & Processing
+| Step | Status | Notes |
+| :--- | :--- | :--- |
+| **Data Conversion & Calibration** | **COMPLETED** | Successfully converted raw files and calibrated to compute $S_v$ using `ep.calibrate.compute_Sv()`. Applied environmental parameters (Temp: 4°C, Salinity: 35, Pressure: 159 * 1.01). |
+| **Applying Masks & Filters** | **COMPLETED** | Implemented depth masking to remove surface interference (<0m), bottom artifacts (>157m), and specific hardware interference bands (97m - 102m). |
+| **Data Binning (MVBS)** | **COMPLETED** | Calculated Mean Volume Backscattering Strength (MVBS) to condense high-resolution data. Established 1 Hour x 5 Meter resolution as the optimal balance between detail and processing speed. Merged daily data into monthly `.nc` files. |
+| **Background Noise Removal** | **TESTED** | Integrated the De Robertis & Higginbottom (2007) algorithm via `ep.clean.remove_background_noise`. |
+
+
+### 📈 Data Visualization & Biological Metrics
+| Step | Status | Notes |
+| :--- | :--- | :--- |
+| **Frequency Distribution Analysis** | **COMPLETED** | Generated $S_v$ histograms to mathematically separate background noise/empty ocean from the "biological tail." Used this to justify SNR thresholds and identify non-biological anomalies (e.g., sharp spikes at -60 dB). |
+| **Center of Mass (CM) Calculation** | **COMPLETED** | Developed script to calculate the depth-weighted Center of Mass based on Urmy et al. (2012) to track Diurnal Vertical Migration (DVM). Handled conversion from logarithmic $S_v$ to linear $s_v$ for accurate mathematical weighting. |
+| **Timezone Alignment** | **CONSIDERED/Not Applied Yet** | Identified the "DVM Trap" (AZFP records in UTC). Verified the mathematical alignment of the dawn descent with local Newfoundland Daylight Time (UTC-2.5) sunrise. |
+| **Custom Visualization Tool** | **COMPLETED** | Built an automated, terminal-based Python script to instantly slice data by date/channel and generate high-resolution DVM tracking plots without loading massive datasets into memory. |
+
+### 🐛 Solved Methodological & Code Issues
+* **`echo_range` vs `depth` Conflict:** Discovered that running background noise removal on `depth` destroys the spherical spreading physics. Solved by patching `sound_absorption` from raw files into the binned files, manipulating `xarray` dimensions (renaming `echo_range` to `range_sample`), and correctly applying the TVG compensation.
+* **Binning Artifacts:** Realized that binning *before* noise removal artificially raises the noise floor. Successfully implemented a temporary 10dB SNR threshold for progress visualizations, need to remove the noise floor again before binning, with the permanent fix documented to move noise removal inside the pre-binning loop (at 3dB SNR) for the final thesis pipeline. Need to finalise the outline and details first
+
+### 🟢 Progress Summary (March 2026)
+* The core acoustic processing pipeline is functional from raw conversion to final biological visualization.
+* Successfully extracted and plotted a textbook Diurnal Vertical Migration (DVM) "heartbeat" from the May 2023 125 kHz dataset.
+
+### ➡️ Next Steps
+* Move the Higginbottom background noise removal step *inside* the main processing loop (before binning) using a 3dB threshold for final, rigorous thesis data products.
+* Calculate **Inertia (Variance)** alongside the Center of Mass to quantify the thickness and dispersion of the zooplankton scattering layers.
+* Begin integrating in-situ data for environmental correlation.
