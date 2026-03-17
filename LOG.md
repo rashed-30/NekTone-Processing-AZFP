@@ -2,6 +2,12 @@
 
 This log details the setup, configuration, and daily progress for the research project focusing on acoustic zooplankton fish profiler (AZFP) data from the NL region.
 
+## Things to consider
+- Used constant 1.35 for 200ms, 200hz frequency
+- Used Temperature 4°C for bottom sensor
+- Used salinity 35PPT for now!
+- Used 
+
 ## 2025-10-21 (Initial Setup Phase)
 
 ### ⚙️ Environment Setup and Configuration
